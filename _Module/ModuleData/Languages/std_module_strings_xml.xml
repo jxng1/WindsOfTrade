@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<base xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" type="string">
+    <tags>
+        <tag language="English" />
+    </tags>
+    <strings>
+		<string id="ii72WyNL" text="PRICE DATA" />
+        <string id="VKkiPo9W" text="You have {AMOUNT}" />
+        <string id="hve9LACb" text="Sell here to break even" />
+        <string id="sd6cN2Dj" text="Sell at {WHERE} ({DISTANCE} miles) for {MORE}% more" />
+		<string id="caaVIYnm" text="Sell here for {PROFIT}% profit" />
+		<string id="PA8Hj4bM" text="Sell here for a {LOSS}% loss" />
+		<string id="oVZwPLij" text="About the usual price" />
+		<string id="AbPnZRIw" text="{MORE_EXPENSIVE}% more expensive than usual" />
+		<string id="4DjKMJ2l" text="{LESS_EXPENSIVE}% cheaper than usual" />
+		<string id="whqxpBwA" text="This is the best place to sell this item" />
+		<string id="fusk5kOb" text="This is the best place to buy this item" />
+		<string id="CTw6t9SU" text="Buy {COUNT} more at {WHERE} ({DISTANCE} miles) for {PRICE}" />
+		<string id="jeKcVBlz" text="Buy at {WHERE} ({DISTANCE} miles) sell here for {HOW_MUCH_PROFIT}% profit" />
+		<string id="1TTAJSpB" text="Buy {CHEAPER}% cheaper at {WHERE} ({DISTANCE} miles)" />
+		<string id="TBqKTzSv" text="{COUNT} units" />
+		<string id="mKle3hW9" text="Sell at {WHERE} ({DISTANCE} miles) for {PROFIT}% profit" />
+	</strings>
+</base>
