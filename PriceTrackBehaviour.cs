@@ -112,7 +112,7 @@ namespace WindsOfTrade
             List<PriceData> prices = new List<PriceData>();
 
             // TODO: implement destination tracker too rather than just tracker radius
-            foreach (Settlement settlement in Settlement.FindAll(delegate (Settlement s) { return GetDistanceBetweenPartyAndSettlement(party, s) <= TrackerRadius.radius; }))
+            foreach (Settlement settlement in Settlement.FindAll(delegate (Settlement s) { return Utilities.CalculateFloatDistanceBetweenPartyAndSettlement(s, party) <= TrackerRadius.radius; }))
             {
                 if (settlement.Town != null)
                 {
@@ -131,11 +131,6 @@ namespace WindsOfTrade
             prices.Sort((PriceData a, PriceData b) => a.buyPrice.CompareTo(b.buyPrice));
 
             return prices;
-        }
-
-        private static float GetDistanceBetweenPartyAndSettlement(MobileParty party, Settlement settlement)
-        {
-            return party.GetPosition2D.Distance(settlement.GetPosition2D);
         }
     }
 }

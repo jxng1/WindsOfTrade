@@ -2,10 +2,14 @@
 using System.IO;
 using System.Xml;
 
+using TaleWorlds.CampaignSystem.Party;
+using TaleWorlds.CampaignSystem.Settlements;
 using TaleWorlds.Library;
 
+using MathF = TaleWorlds.Library.MathF;
+
 namespace WindsOfTrade
-{
+{ 
     internal static class Utilities
     {
         internal static ColourStyle colourStyle = ColourStyle.PERCENTAGE_DIFFERENCE;
@@ -58,6 +62,16 @@ namespace WindsOfTrade
         public static void LogToFile(string s)
         {
             // TODO: unimplemented
+        }
+
+        public static int CalculateIntDistanceBetweenMainPartyAndSettlement(Settlement settlement)
+        {
+            return MathF.Round(MobileParty.MainParty.GetPosition2D.Distance(settlement.GetPosition2D));
+        }
+
+        public static float CalculateFloatDistanceBetweenPartyAndSettlement(Settlement settlement, MobileParty party)
+        {
+            return party.GetPosition2D.Distance(settlement.GetPosition2D);
         }
     }
 

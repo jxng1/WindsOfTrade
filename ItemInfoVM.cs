@@ -13,8 +13,6 @@ using TaleWorlds.InputSystem;
 using TaleWorlds.Library;
 using TaleWorlds.Localization;
 
-using MathF = TaleWorlds.Library.MathF;
-
 namespace WindsOfTrade
 {
     internal static class ItemInfoVM
@@ -363,7 +361,7 @@ namespace WindsOfTrade
 
             // TODO: implement trade destination tracker
             //rumourInfo.isTradeDestination = Equals(priceData.settlement.Id == TradeDestination.settlementId);
-            int distance = DistanceToSettlement(priceData.settlement);
+            int distance = Utilities.CalculateIntDistanceBetweenMainPartyAndSettlement(priceData.settlement);
 
             if (distance > 0)
             {
@@ -388,7 +386,7 @@ namespace WindsOfTrade
 
             if (more >= 1.0f) // TODO: // pull better price sell threshold(%) from config
             {
-                int distance = DistanceToSettlement(priceData.settlement);
+                int distance = Utilities.CalculateIntDistanceBetweenMainPartyAndSettlement(priceData.settlement);
 
                 if (distance > 0)
                 {
@@ -415,7 +413,7 @@ namespace WindsOfTrade
 
             if (more >= 1.0f) // TODO: pull better price sell threshold(%) from config
             {
-                int distance = DistanceToSettlement(priceData.settlement);
+                int distance = Utilities.CalculateIntDistanceBetweenMainPartyAndSettlement(priceData.settlement);
 
                 if (distance > 0)
                 {
@@ -442,7 +440,7 @@ namespace WindsOfTrade
 
             if (cheaper >= 1.0f) // TODO: pull better price buy threshold(%) from config
             {
-                int distance = DistanceToSettlement(priceData.settlement);
+                int distance = Utilities.CalculateIntDistanceBetweenMainPartyAndSettlement(priceData.settlement);
 
                 if (distance > 0)
                 {
@@ -483,7 +481,7 @@ namespace WindsOfTrade
 
             if (profit >= 0.5f) // TODO: pull profit threshold(%) from config
             {
-                int distance = DistanceToSettlement(priceData.settlement);
+                int distance = Utilities.CalculateIntDistanceBetweenMainPartyAndSettlement(priceData.settlement);
 
                 if (distance > 0)
                 {
@@ -498,12 +496,6 @@ namespace WindsOfTrade
             }
 
             return rumourInfo;
-        }
-
-        // TODO: move to utils and merge into another method in PriceTrackBehaviour.cs
-        private static int DistanceToSettlement(Settlement settlement)
-        {
-            return MathF.Round(MobileParty.MainParty.GetPosition2D.Distance(settlement.GetPosition2D));
         }
 
         private static void ShowRumourText(ItemMenuVM instance, string text, Color color)
