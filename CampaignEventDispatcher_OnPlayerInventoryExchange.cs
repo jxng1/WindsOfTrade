@@ -11,7 +11,7 @@ namespace WindsOfTrade
     [HarmonyPatch(typeof(CampaignEventDispatcher), "OnPlayerInventoryExchange")]
     internal class CampaignEventDispatcher_OnPlayerInventoryExchange
     {
-        private static Dictionary<string, ItemStock> dictionary = new Dictionary<string, ItemStock>();
+        private static Dictionary<string, ItemStock> _dictionary = new Dictionary<string, ItemStock>();
 
         public static void Postfix(List<ValueTuple<ItemRosterElement, int>> purchasedItems,
             List<ValueTuple<ItemRosterElement, int>> soldItems,
@@ -58,7 +58,7 @@ namespace WindsOfTrade
         {
             StringBuilder stringBuilder = new StringBuilder();
 
-            foreach (KeyValuePair<string, ItemStock> keyValuePair in dictionary)
+            foreach (KeyValuePair<string, ItemStock> keyValuePair in _dictionary)
             {
                 ItemStock itemStock = keyValuePair.Value;
                 stringBuilder.Append(string.Format("{0}, {1}, {2}, {3}, {4}", new object[]
@@ -75,7 +75,7 @@ namespace WindsOfTrade
         }
         public static void Deserialise(string values)
         {
-            dictionary.Clear();
+            _dictionary.Clear();
 
             string[] strings = values.Split(new string[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries);
 
@@ -94,14 +94,14 @@ namespace WindsOfTrade
                         itemStock.historicalTotalValue = Convert.ToInt32(subValues[4]); ;
                     }
 
-                    dictionary.Add(id, itemStock);
+                    _dictionary.Add(id, itemStock);
                 }
             }
         }
 
         internal static void UpdateStock(string id, ItemStock itemStock)
         {
-            dictionary[id] = itemStock;
+            _dictionary[id] = itemStock;
         }
 
         internal static ItemStock GetStock(string id)
@@ -109,14 +109,14 @@ namespace WindsOfTrade
             ItemStock itemStock;
             ItemStock result;
 
-            if (dictionary.TryGetValue(id, out itemStock))
+            if (_dictionary.TryGetValue(id, out itemStock))
             {
                 result = itemStock;
             }
             else
             {
                 ItemStock newStock = default;
-                dictionary.Add(id, newStock);
+                _dictionary.Add(id, newStock);
                 result = newStock;
             }
 
@@ -127,7 +127,7 @@ namespace WindsOfTrade
         {
             ItemStock itemStock;
 
-            if (dictionary.TryGetValue(id, out itemStock))
+            if (_dictionary.TryGetValue(id, out itemStock))
             {
                 if (itemStock.currentAmountInStock > 0)
                 {
@@ -142,7 +142,7 @@ namespace WindsOfTrade
         {
             ItemStock itemStock;
 
-            if (dictionary.TryGetValue(itemId, out itemStock))
+            if (_dictionary.TryGetValue(itemId, out itemStock))
             {
                 if (itemStock.currentAmountInStock > 0)
                 {

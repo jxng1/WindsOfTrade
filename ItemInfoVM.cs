@@ -19,7 +19,7 @@ namespace WindsOfTrade
 {
     internal static class ItemInfoVM
     {
-        public static void ShowTooltips(ItemMenuVM instance)
+        internal static void ShowTooltips(ItemMenuVM instance)
         {
             try
             {
@@ -40,14 +40,15 @@ namespace WindsOfTrade
                     int currentSellPrice = marketData.GetPrice(element.Item, MobileParty.MainParty, true, inventoryLogic.OtherParty);
                     int currentBuyPrice = marketData.GetPrice(element.Item, MobileParty.MainParty, false, inventoryLogic.OtherParty);
 
-                    if (isLeftPanel && element.Item.IsFood)
+                    if (isLeftPanel && (element.Item.IsTradeGood || element.Item.IsAnimal))
                     {
                         ItemRosterElement? item = inventoryLogic.FindItemFromSide(InventoryLogic.InventorySide.PlayerInventory, element);
                         int itemAmount = (item != null) ? item.GetValueOrDefault().Amount : 0;
                         ShowNewLine(instance);
 
                         MBTextManager.SetTextVariable("AMOUNT", itemAmount);
-                        ShowRumourText(instance, new TextObject("{=VKkiPo9W}You have {AMOUNT}").ToString(), Color.White);
+
+                        ShowRumourText(instance, new TextObject("{=VKkiPo9W}You have {AMOUNT}").ToString(), Color.ConvertStringToColor(Colour.ALABASTER));
                     }
 
                     string itemId = element.Item.StringId;
@@ -125,8 +126,9 @@ namespace WindsOfTrade
                     }
 
                     ItemData itemData;
-                    // TODO: may be null exception here
-                    if (PriceTrackBehaviour.itemDictionary.TryGetValue(itemId, out itemData) && itemData.IsValid())
+                    // May be null here, but doesn't matter as the try get would prevent a null reference exception
+                    // Only do items that are trade goods, ignore armours, weapons, etc, uniques
+                    if (PriceTrackBehaviour.itemDictionary.TryGetValue(itemId, out itemData) && itemData.IsValid() && (itemData.itemObject.IsTradeGood || itemData.itemObject.IsAnimal))
                     {
                         List<RumourInfo> betterSellRumours = new List<RumourInfo>();
                         List<RumourInfo> betterBuyRumours = new List<RumourInfo>();
@@ -192,51 +194,59 @@ namespace WindsOfTrade
                         }
 
                         ShowNewLine(instance);
-
-                        if (betterSellRumours.Count > 0)
-                        {
-                            int count = 0;
-
-                            foreach (RumourInfo rumourInfo in betterSellRumours)
-                            {
-                                count++;
-
-                                if (count <= 8 || rumourInfo.isTradeDestination)
-                                {
-                                    if (count > 8 && rumourInfo.isTradeDestination)
-                                    {
-                                        ShowNewLine(instance);
-                                    }
-                                    ShowRumourTooltip(instance, rumourInfo);
-                                }
-                            }
-                            ShowNewLine(instance);
-                        }
-                        else if (!isLeftPanel)
-                        {
-                            ShowRumourText(instance, new TextObject("{=whqxpBwA}This is the best place to sell this item").ToString(), Color.FromUint(4278255360U));
-                            ShowNewLine(instance);
-                        }
-
-                        if (betterBuyRumours.Count > 0)
-                        {
-                            betterBuyRumours = FilterBuyRumours(betterBuyRumours);
-
-                            foreach (RumourInfo rumour in betterBuyRumours)
-                            {
-                                ShowRumourTooltip(instance, rumour);
-                            }
-                        }
-                        else if (isLeftPanel)
-                        {
-                            ShowRumourText(instance, new TextObject("{=fusk5kOb}This is the best place to buy this item").ToString(), Color.FromUint(4278255360U));
-                        }
+                        ShowSellRumours(instance, isLeftPanel, betterSellRumours);
+                        ShowBuyRumours(instance, isLeftPanel, betterBuyRumours);
                     }
                 }
             }
             catch (Exception e2)
             {
                 Utilities.Log("Failed to show tooltips: " + e2.Message, LogLevel.ERROR);
+            }
+        }
+
+        private static void ShowBuyRumours(ItemMenuVM instance, bool isLeftPanel, List<RumourInfo> betterBuyRumours)
+        {
+            if (betterBuyRumours.Count > 0)
+            {
+                betterBuyRumours = FilterBuyRumours(betterBuyRumours);
+
+                foreach (RumourInfo rumour in betterBuyRumours)
+                {
+                    ShowRumourTooltip(instance, rumour);
+                }
+            }
+            else if (isLeftPanel)
+            {
+                ShowRumourText(instance, new TextObject("{=fusk5kOb}This is the best place to buy this item").ToString(), Color.FromUint(4278255360U));
+            }
+        }
+
+        private static void ShowSellRumours(ItemMenuVM instance, bool isLeftPanel, List<RumourInfo> betterSellRumours)
+        {
+            if (betterSellRumours.Count > 0)
+            {
+                int count = 0;
+
+                foreach (RumourInfo rumourInfo in betterSellRumours)
+                {
+                    count++;
+
+                    if (count <= 8 || rumourInfo.isTradeDestination)
+                    {
+                        if (count > 8 && rumourInfo.isTradeDestination)
+                        {
+                            ShowNewLine(instance);
+                        }
+                        ShowRumourTooltip(instance, rumourInfo);
+                    }
+                }
+                ShowNewLine(instance);
+            }
+            else if (!isLeftPanel)
+            {
+                ShowRumourText(instance, new TextObject("{=whqxpBwA}This is the best place to sell this item").ToString(), Color.FromUint(4278255360U));
+                ShowNewLine(instance);
             }
         }
 
@@ -268,7 +278,7 @@ namespace WindsOfTrade
 
             if (isTradeDestination)
             {
-                color = (rumourInfo.isBestSell ? Color.FromUint(4294918143U) : Color.FromUint(2147418367U));
+                color = rumourInfo.isBestSell ? Color.FromUint(4294918143U) : Color.FromUint(2147418367U);
             }
             else
             {
@@ -387,7 +397,7 @@ namespace WindsOfTrade
                     MBTextManager.SetTextVariable("MORE", more.ToString("0"));
                     rumourInfo.text = new TextObject("{=jeKcVBlz}Buy at {WHERE} ({DISTANCE} miles) sell here for {MORE}% profit").ToString();
                     rumourInfo.percentageDifference = more;
-                    rumourInfo.profitPerMile = (currentSellPrice - (float)priceData.buyPrice) / (float)distance;
+                    rumourInfo.profitPerMile = (currentSellPrice - (float)priceData.buyPrice) / distance;
                 }
                 rumourInfo.isBestBuy = true;
             }
@@ -401,7 +411,7 @@ namespace WindsOfTrade
 
             // TODO: implement trade destination tracker
             // rumourInfo.isTradeDestination = Equals(priceData.settlement.Id == TradeDestination.settlementId);
-            float more = ((float)priceData.sellPrice - currentSellPrice) / (float)priceData.sellPrice * 100.0f;
+            float more = ((float)priceData.sellPrice - currentSellPrice) / priceData.sellPrice * 100.0f;
 
             if (more >= 1.0f) // TODO: pull better price sell threshold(%) from config
             {
@@ -442,7 +452,7 @@ namespace WindsOfTrade
                     rumourInfo.text = string.Format("{0} {1}",
                         new TextObject("{=1TTAJSpB}Buy {CHEAPER}% cheaper at {WHERE} ({DISTANCE} miles)").ToString(),
                         ShowStockAtSettlement(priceData).TrimEnd(Array.Empty<char>()));
-                    rumourInfo.profitPerMile = (currentBuyPrice - (float)priceData.buyPrice) / (float)distance;
+                    rumourInfo.profitPerMile = (currentBuyPrice - (float)priceData.buyPrice) / distance;
                 }
                 rumourInfo.isBestBuy = true;
             }
@@ -469,7 +479,7 @@ namespace WindsOfTrade
 
             // TODO: implement trade destination tracker
             //rumourInfo.isTradeDestination = Equals(priceData.settlement.Id == TradeDestination.settlementId);
-            float profit = ((float)priceData.sellPrice - currentBuyPrice) / (float)priceData.sellPrice * 100.0f;
+            float profit = (priceData.sellPrice - currentBuyPrice) / priceData.sellPrice * 100.0f;
 
             if (profit >= 0.5f) // TODO: pull profit threshold(%) from config
             {
@@ -482,7 +492,7 @@ namespace WindsOfTrade
                     MBTextManager.SetTextVariable("PROFIT", profit.ToString("0"));
                     rumourInfo.text = new TextObject("{=mKle3hW9}Sell at {WHERE} ({DISTANCE} miles) for {PROFIT}% profit").ToString();
                     rumourInfo.percentageDifference = profit;
-                    rumourInfo.profitPerMile = ((float)priceData.sellPrice - currentBuyPrice) / (float)distance;
+                    rumourInfo.profitPerMile = (priceData.sellPrice - currentBuyPrice) / distance;
                 }
                 rumourInfo.isBestSell = true;
             }
