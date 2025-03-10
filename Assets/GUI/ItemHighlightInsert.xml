@@ -1,0 +1,1 @@
+﻿<Constant Name="WindsOfTrade.ItemHighlight" BooleanCheck="*IsPlayerItem" OnTrue="WindsOfTrade.ItemHighlight.Right" OnFalse="WindsOfTrade.ItemHighlight.Left" />

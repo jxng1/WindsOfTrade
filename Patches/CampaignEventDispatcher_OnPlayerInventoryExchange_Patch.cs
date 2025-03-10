@@ -6,10 +6,10 @@ using TaleWorlds.CampaignSystem;
 using TaleWorlds.Core;
 
 
-namespace WindsOfTrade
+namespace WindsOfTrade.Patches
 {
     [HarmonyPatch(typeof(CampaignEventDispatcher), "OnPlayerInventoryExchange")]
-    internal class CampaignEventDispatcher_OnPlayerInventoryExchange
+    internal class CampaignEventDispatcher_OnPlayerInventoryExchange_Patch
     {
         private static Dictionary<string, ItemStock> _dictionary = new Dictionary<string, ItemStock>();
 

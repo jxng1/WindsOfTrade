@@ -10,7 +10,7 @@
             }
         }
 
-        internal string text { get; set; }
+        internal string? text { get; set; }
 
         internal float profitPerMile { get; set; }
 

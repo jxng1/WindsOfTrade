@@ -9,7 +9,7 @@ using TaleWorlds.Library;
 using MathF = TaleWorlds.Library.MathF;
 
 namespace WindsOfTrade
-{ 
+{
     internal static class Utilities
     {
         internal static ColourStyle colourStyle = ColourStyle.PERCENTAGE_DIFFERENCE;
@@ -18,7 +18,7 @@ namespace WindsOfTrade
         {
             try
             {
-                string fileName = Path.Combine(Directory.GetCurrentDirectory(), "..\\..\\Modules\\WindsOfTrade", "config.xml");
+                string fileName = Path.Combine(Directory.GetCurrentDirectory(), @"..\..\Modules\WindsOfTrade", "config.xml");
                 bool flag = !File.Exists(fileName);
 
                 if (!flag)

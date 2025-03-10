@@ -5,7 +5,7 @@
     <TargetFrameworks>net472;net6</TargetFrameworks>
     <Platforms>x64</Platforms>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
-    <LangVersion>10.0</LangVersion>
+    <LangVersion>11.0</LangVersion>
     <Nullable>enable</Nullable>
     <BuildForWindows>false</BuildForWindows>
     <BuildForWindowsStore>false</BuildForWindowsStore>
@@ -15,6 +15,7 @@
     <GameFolder>$(BANNERLORD_GAME_DIR)</GameFolder>
     <GameBinariesFolder Condition="Exists('$(GameFolder)\bin\Win64_Shipping_Client\Bannerlord.exe')">Win64_Shipping_Client</GameBinariesFolder>
     <GameBinariesFolder Condition="Exists('$(GameFolder)\bin\Gaming.Desktop.x64_Shipping_Client\Bannerlord.exe')">Gaming.Desktop.x64_Shipping_Client</GameBinariesFolder>
+    <OutputType>Library</OutputType>
   </PropertyGroup>
 
   <PropertyGroup Condition="$(TargetFramework) == 'net472'">
@@ -29,6 +30,9 @@
     <Reference Include="$(GameFolder)\bin\$(GameBinariesFolder)\Newtonsoft.Json.dll">
       <HintPath>%(Identity)</HintPath>
       <Private>False</Private>
+    </Reference>
+    <Reference Include="Bannerlord.UIExtenderEx">
+      <HintPath>..\..\Program Files (x86)\Steam\steamapps\common\Mount &amp; Blade II Bannerlord\Modules\Bannerlord.UIExtenderEx\bin\Win64_Shipping_Client\Bannerlord.UIExtenderEx.dll</HintPath>
     </Reference>
     <Reference Include="$(GameFolder)\bin\$(GameBinariesFolder)\TaleWorlds.*.dll" Exclude="$(GameFolder)\bin\$(GameBinariesFolder)\TaleWorlds.Native.dll">
       <HintPath>%(Identity)</HintPath>
@@ -67,6 +71,16 @@
     <PackageReference Include="Lib.Harmony" Version="2.2.2" IncludeAssets="compile" />
     <PackageReference Include="Harmony.Extensions" Version="3.2.0.77" PrivateAssets="all" IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive" />
     <PackageReference Include="BUTR.Harmony.Analyzer" Version="1.0.1.50" PrivateAssets="all" IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive" />
+    <PackageReference Include="System.Numerics.Vectors" Version="4.6.0" />
   </ItemGroup>
 
+  <!-- Required for GUI assets-->
+  <ItemGroup>
+	<Content Include="GUI\**\*" LinkBase="GUI"/>
+  </ItemGroup>
+
+  <Target Name="CopyAssets" AfterTargets="PostBuildEvent" Condition="$(ModuleId) != '' AND Exists($(GameFolder))">
+	<CreateDirectory Directory="$(GameFolder)/Modules/$(ModuleId)/" />
+	<CopyFolder FromDirectory="Assets/GUI" ToDirectory="$(GameFolder)/Modules/$(ModuleId)/GUI" Regex="^.*\.xml$" Clean="true" />
+  </Target>
 </Project>

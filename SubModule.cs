@@ -1,5 +1,10 @@
-﻿using HarmonyLib;
-using System;
+﻿using System.IO;
+using System.Reflection;
+
+using HarmonyLib;
+
+using Bannerlord.UIExtenderEx;
+
 using TaleWorlds.CampaignSystem;
 using TaleWorlds.CampaignSystem.Party;
 using TaleWorlds.CampaignSystem.Settlements;
@@ -8,46 +13,47 @@ using TaleWorlds.Core;
 using TaleWorlds.InputSystem;
 using TaleWorlds.MountAndBlade;
 
+using WindsOfTrade.Behaviours;
 
 namespace WindsOfTrade
 {
     public class SubModule : MBSubModuleBase
     {
+        public static string? ModuleDirectory => Path.GetDirectoryName(typeof(SubModule).Assembly.Location);
+
+        internal static GlobalTradeItemTrackerBehaviour? globalTradeItemTrackerBehaviour;
+
+        internal static HighlightBetterOptions highlightBetterOptions = new HighlightBetterOptions();
+
         protected override void OnSubModuleLoad()
         {
             base.OnSubModuleLoad();
 
-            Harmony Harmony = new Harmony("winds_of_trade_1.12.2.1");
-            Harmony.PatchAll();
+            UIExtender uiExtender = UIExtender.Create(nameof(WindsOfTrade));
+            uiExtender.Register(typeof(SubModule).Assembly);
+            uiExtender.Enable();
+
+            Harmony harmony = new Harmony("winds_of_trade_1.12.2.1_harmony");
+            harmony.PatchAll(Assembly.GetExecutingAssembly());
         }
 
-        protected override void OnGameStart(Game game, IGameStarter gameStarterObject)
+        protected override void OnGameStart(Game game, IGameStarter gameStarter)
         {
             // Super method call
-            base.OnGameStart(game, gameStarterObject);
+            if (gameStarter is not CampaignGameStarter campaignGameStarter)
+            {
+                return;
+            }
+
 
             // Read config
             // TODO: implement config
             //Utilities.ReadConfig();
 
-            // Add behaviour to game starter
-            try
-            {
-                CampaignGameStarter campaignGameStarter = (CampaignGameStarter)gameStarterObject;
-                if (campaignGameStarter != null)
-                {
-                    campaignGameStarter.AddBehavior(new PriceTrackBehaviour());
-                    Utilities.Log("Winds of Trade loaded successfully", LogLevel.SUCCESS);
-                }
-                else
-                {
-                    Utilities.Log("Failed to load Winds of Trade: GameStarterObject is null", LogLevel.ERROR);
-                }
-            }
-            catch (Exception e)
-            {
-                Utilities.Log("Failed to load Winds of Trade: " + e.Message, LogLevel.ERROR);
-            }
+            // Add behaviours to game starter
+            campaignGameStarter.AddBehavior(globalTradeItemTrackerBehaviour = new GlobalTradeItemTrackerBehaviour());
+
+            Utilities.Log("Winds of Trade loaded successfully", LogLevel.SUCCESS);
         }
 
         protected override void OnApplicationTick(float dt)
@@ -72,112 +78,21 @@ namespace WindsOfTrade
 
                 if (radiusChanged)
                 {
-                    Utilities.Log(String.Format("Tracker radius: {0}", TrackerRadius.radius), LogLevel.LOG);
+                    Utilities.Log(string.Format("Tracker radius: {0}", TrackerRadius.radius), LogLevel.LOG);
 
                     // Update prices
                     MobileParty mainParty = MobileParty.MainParty;
-                    PriceTrackBehaviour.UpdatePrices(mainParty, mainParty.CurrentSettlement);
+                    globalTradeItemTrackerBehaviour?.UpdatePrices(mainParty, mainParty.CurrentSettlement);
                 }
 
                 // TODO: Implement destination tracker
             }
         }
-    }
 
-    [HarmonyPatch(typeof(CampaignEvents), "OnAfterSettlementEntered")]
-    internal class CampaignEvents_OnAfterSettlementEntered
-    {
-        public static void Postfix(MobileParty party, Settlement settlement)
+        public override void OnGameEnd(Game game)
         {
-            if (party == MobileParty.MainParty)
-            {
-                PriceTrackBehaviour.UpdatePrices(party, settlement);
-            }
-        }
-    }
-
-    [HarmonyPatch(typeof(Campaign), "OnDataLoadFinished")]
-    internal class CampaignEvents_OnDataLoadFinished
-    {
-        public static void Postfix()
-        {
-            PriceTrackBehaviour.UpdatePrices(); // TODO: figure out a better way to do this
-        }
-    }
-
-    internal static class TrackerRadius
-    {
-        // TODO: read from config
-        internal static float radius { get; set; } = 250.0f;
-
-        internal static void Increase()
-        {
-            if (radius < 250.0f)
-            {
-                radius += 25.0f;
-            }
-        }
-
-        internal static void Decrease()
-        {
-            if (radius > 25.0f)
-            {
-                radius -= 25.0f;
-            }
-        }
-    }
-
-    [HarmonyPatch(typeof(ItemMenuVM), "SetMerchandiseComponentTooltip")]
-    internal static class ItemMenuVM_SetMerchandiseComponentTooltip
-    {
-        public static bool Prefix(ItemMenuVM __instance)
-        {
-            ItemInfoVM.ShowTooltips(__instance);
-
-            // Don't run original code so return false, skipping everything
-            return false;
-        }
-    }
-
-    [HarmonyPatch(typeof(ItemMenuVM), "SetHorseComponentTooltip")]
-    internal static class ItemMenuVM_SetHorseComponentTooltip
-    {
-        public static void Postfix(ItemMenuVM __instance)
-        {
-            ItemInfoVM.ShowTooltips(__instance);
-        }
-    }
-
-    [HarmonyPatch(typeof(ItemMenuVM), "SetWeaponComponentTooltip")]
-    internal static class ItemMenuVM_SetWeaponComponentTooltip
-    {
-        public static void Postfix(ItemMenuVM __instance)
-        {
-            ItemInfoVM.ShowTooltips(__instance);
-        }
-    }
-
-    internal struct ItemStock
-    {
-        internal int currentAmountInStock { get; set; }
-        internal int currentStockValue { get; set; }
-        internal int totalAmountHeld { get; set; }
-        internal int historicalTotalValue { get; set; }
-
-        internal ItemStock(int quantity, int value)
-        {
-            currentAmountInStock = quantity;
-            currentStockValue = value;
-            totalAmountHeld = 0;
-            historicalTotalValue = 0;
-        }
-
-        internal ItemStock(int quantity, int value, int totalAmount, int historicalValue)
-        {
-            currentAmountInStock = quantity;
-            currentStockValue = value;
-            totalAmountHeld = totalAmount;
-            historicalTotalValue = historicalValue;
+            globalTradeItemTrackerBehaviour?.Dispose();
+            globalTradeItemTrackerBehaviour = null;
         }
     }
 }
