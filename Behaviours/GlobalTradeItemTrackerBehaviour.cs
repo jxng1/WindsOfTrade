@@ -82,11 +82,12 @@ namespace WindsOfTrade.Behaviours
 
         public void UpdatePrices(MobileParty mainParty, Settlement settlement)
         {
-            UpdatePricesForItemRoster(mainParty.ItemRoster, mainParty, true);
+            HashSet<string> itemIds = new HashSet<string>();
+            UpdatePricesForItemRoster(mainParty.ItemRoster, mainParty, itemIds);
 
             if (settlement != null)
             {
-                UpdatePricesForItemRoster(settlement.ItemRoster, mainParty, false);
+                UpdatePricesForItemRoster(settlement.ItemRoster, mainParty, itemIds);
             }
         }
 
@@ -354,10 +355,8 @@ namespace WindsOfTrade.Behaviours
             }
         }
 
-        private static void UpdatePricesForItemRoster(ItemRoster itemRoster, MobileParty party, bool isPlayerItem)
+        private static void UpdatePricesForItemRoster(ItemRoster itemRoster, MobileParty party, HashSet<string> itemIds)
         {
-            HashSet<string> itemIds = new HashSet<string>();
-
             foreach (ItemRosterElement itemRosterElement in itemRoster)
             {
                 ItemObject itemObject = itemRosterElement.EquipmentElement.Item;
@@ -409,7 +408,20 @@ namespace WindsOfTrade.Behaviours
                 return;
             }
 
-            widget.MainContainer.Brush = widgetIntercept.ShouldHighlightItem ? widgetIntercept.BetterItemHighlightBrush : widget.DefaultBrush;
+            if (widgetIntercept.ShouldHighlightItem)
+            {
+                if (widgetIntercept.IsItemBadPrice)
+                {
+                    widget.MainContainer.Brush.DefaultLayer.Color = Color.ConvertStringToColor("#D2042DFF");
+                } else
+                {
+                    widget.MainContainer.Brush.DefaultLayer.Color = Color.ConvertStringToColor("#40EF40FF");
+                }
+
+                return;
+            }
+
+            widget.MainContainer.Brush = widgetIntercept.DefaultBrush;
         }
 
         private void SPInventoryVM_InitializeInventory_InitializeInventory(SPInventoryVM spInventoryVM)

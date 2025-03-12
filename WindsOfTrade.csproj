@@ -74,13 +74,13 @@
     <PackageReference Include="System.Numerics.Vectors" Version="4.6.0" />
   </ItemGroup>
 
-  <!-- Required for GUI assets-->
-  <ItemGroup>
+  <!-- Required for GUI assets, no longer needed but will keep in here-->
+  <!--<ItemGroup>
 	<Content Include="GUI\**\*" LinkBase="GUI"/>
   </ItemGroup>
 
   <Target Name="CopyAssets" AfterTargets="PostBuildEvent" Condition="$(ModuleId) != '' AND Exists($(GameFolder))">
 	<CreateDirectory Directory="$(GameFolder)/Modules/$(ModuleId)/" />
 	<CopyFolder FromDirectory="Assets/GUI" ToDirectory="$(GameFolder)/Modules/$(ModuleId)/GUI" Regex="^.*\.xml$" Clean="true" />
-  </Target>
+  </Target>-->
 </Project>

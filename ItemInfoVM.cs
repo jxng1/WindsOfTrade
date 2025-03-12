@@ -19,14 +19,13 @@ namespace WindsOfTrade
 {
     internal static class ItemInfoVM
     {
+        private static InventoryLogic _inventoryLogic => InventoryManager.InventoryLogic;
+
         internal static void ShowTooltips(ItemMenuVM instance)
         {
             if (Campaign.Current.GameMode == CampaignGameMode.Campaign)
             {
-                InventoryLogic? inventoryLogic = AccessTools2.Field(typeof(ItemMenuVM), "_inventoryLogic")?.GetValue(instance) as InventoryLogic;
-                //ItemMenuVMFields itemMenuVMFields = new ItemMenuVMFields(instance);
-                //InventoryLogic inventoryLogic = (InventoryLogic)itemMenuVMFields.GetValue("_inventoryLogic");
-                IMarketData? marketData = inventoryLogic?.MarketData;
+                IMarketData? marketData = _inventoryLogic?.MarketData;
 
                 if (marketData == null)
                 {
@@ -35,7 +34,7 @@ namespace WindsOfTrade
                 }
 
                 bool isLeftPanel = instance.IsPlayerItem;
-                Settlement? currentSettlement = inventoryLogic?.OtherParty == null ? null : inventoryLogic.OtherParty.Settlement;
+                Settlement? currentSettlement = _inventoryLogic?.OtherParty == null ? null : _inventoryLogic.OtherParty.Settlement;
                 ItemVM? targetItemVM = AccessTools2.Field(typeof(ItemMenuVM), "_targetItem")?.GetValue(instance) as ItemVM;
 
                 if (targetItemVM == null)
@@ -46,18 +45,18 @@ namespace WindsOfTrade
 
                 EquipmentElement element = targetItemVM.ItemRosterElement.EquipmentElement;
 
-                int marketBuyPrice = marketData.GetPrice(element.Item, MobileParty.MainParty, false, inventoryLogic?.OtherParty);
-                int marketSellPrice = marketData.GetPrice(element.Item, MobileParty.MainParty, true, inventoryLogic?.OtherParty);
+                int marketBuyPrice = marketData.GetPrice(element.Item, MobileParty.MainParty, false, _inventoryLogic?.OtherParty);
+                int marketSellPrice = marketData.GetPrice(element.Item, MobileParty.MainParty, true, _inventoryLogic?.OtherParty);
 
                 if (isLeftPanel && (element.Item.IsTradeGood || element.Item.IsAnimal))
                 {
-                    ItemRosterElement? item = inventoryLogic?.FindItemFromSide(InventoryLogic.InventorySide.PlayerInventory, element);
+                    ItemRosterElement? item = _inventoryLogic?.FindItemFromSide(InventoryLogic.InventorySide.PlayerInventory, element);
                     int itemAmount = item != null ? item.GetValueOrDefault().Amount : 0;
                     ShowNewLine(instance);
 
                     MBTextManager.SetTextVariable("AMOUNT", itemAmount);
 
-                    ShowRumourText(instance, new TextObject("{=VKkiPo9W}You have {AMOUNT}").ToString(), Color.ConvertStringToColor(Colour.ALABASTER));
+                    ShowRumourText(instance, new TextObject("{=VKkiPo9W}You have {AMOUNT}").ToString(), Color.ConvertStringToColor("#FAFAFAFF"));
                 }
 
                 string itemId = element.Item.StringId;

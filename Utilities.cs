@@ -88,10 +88,4 @@ namespace WindsOfTrade
         PERCENTAGE_DIFFERENCE,
         POTENTIAL_PROFIT
     }
-
-    internal class Colour
-    {
-        internal const string ALABASTER = "#FAFAFAFF";
-
-    }
 }
