@@ -12,28 +12,10 @@ namespace WindsOfTrade
         private static readonly Action<InventoryItemTupleWidget>? UpdateCivilianState =
             AccessTools2.GetDelegate<Action<InventoryItemTupleWidget>>(typeof(InventoryItemTupleWidget), nameof(UpdateCivilianState));
 
-        private Brush? _itemHighlightBrush;
         private bool _shouldHighlightItem;
         private bool _isItemBadPrice;
 
         public InventoryItemTupleWidgetIntercept(UIContext context) : base(context) { }
-
-        [Editor(false)]
-        public Brush? ItemHighlightBrush
-        {
-            get
-            {
-                return _itemHighlightBrush;
-            }
-            set
-            {
-                if (_itemHighlightBrush != value)
-                {
-                    _itemHighlightBrush = value;
-                    OnPropertyChanged(value);
-                }
-            }
-        }
 
         [Editor(false)]
         public bool ShouldHighlightItem
